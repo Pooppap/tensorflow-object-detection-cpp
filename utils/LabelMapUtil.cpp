@@ -8,11 +8,11 @@ tensorflow::Status readLabelsMapFile(const std::string &fileName, map<int, std::
 {
 
     // Read file into a string
-    std::ifstream t(fileName);
-    if (t.bad())
+    std::ifstream ifs(fileName);
+    if (ifs.bad())
         return tensorflow::errors::NotFound("Failed to load labels map at '", fileName, "'");
     std::stringstream buffer;
-    buffer << t.rdbuf();
+    buffer << ifs.rdbuf();
     std::string fileString = buffer.str();
 
     // Search entry patterns of type 'item { ... }' and parse each of them
@@ -24,8 +24,8 @@ tensorflow::Status readLabelsMapFile(const std::string &fileName, map<int, std::
     const std::regex reName("\'.+\'");
     std::string entry;
 
-    auto stringBegin = sregex_iterator(fileString.begin(), fileString.end(), reEntry);
-    auto stringEnd = sregex_iterator();
+    auto stringBegin = std::sregex_iterator(fileString.begin(), fileString.end(), reEntry);
+    auto stringEnd = std::sregex_iterator();
 
     int id;
     std::string name;
@@ -33,17 +33,17 @@ tensorflow::Status readLabelsMapFile(const std::string &fileName, map<int, std::
     {
         matcherEntry = *i;
         entry = matcherEntry.str();
-        regex_search(entry, matcherId, reId);
+        std::regex_search(entry, matcherId, reId);
         if (!matcherId.empty())
-            id = stoi(matcherId[0].str());
+            id = std::stoi(matcherId[0].str());
         else
             continue;
-        regex_search(entry, matcherName, reName);
+        std::regex_search(entry, matcherName, reName);
         if (!matcherName.empty())
             name = matcherName[0].str().substr(1, matcherName[0].str().length() - 2);
         else
             continue;
         labelsMap.insert(pair<int, std::string>(id, name));
     }
-    return Status::OK();
+    return tensorflow::Status::OK();
 }
